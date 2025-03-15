@@ -42,7 +42,10 @@ func (params CreateUserParams) Validate() map[string]string {
 func isEmailValid(email string) bool {
 	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 	return emailRegex.MatchString(email)
+}
 
+func IsValidPassword(encpw, password string) bool {
+	return bcrypt.CompareHashAndPassword([]byte(encpw), []byte(password)) == nil
 }
 
 type User struct {

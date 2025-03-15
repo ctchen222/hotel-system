@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/ctchen1999/hotel-system/api"
+	"github.com/ctchen1999/hotel-system/api/middleware"
 	"github.com/ctchen1999/hotel-system/db"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -33,30 +34,40 @@ func main() {
 
 	// Handler initialization
 	var (
-		userStore   = db.NewMongoUserStore(client)
-		hotelStore  = db.NewMongoHotelStore(client)
-		roomStore   = db.NewMongoRoomStore(client, hotelStore)
-		userHandler = api.NewUserHandler(userStore)
-		store       = &db.Store{
-			Hotel: hotelStore,
-			Room:  roomStore,
-			User:  userStore,
+		userStore    = db.NewMongoUserStore(client)
+		hotelStore   = db.NewMongoHotelStore(client)
+		roomStore    = db.NewMongoRoomStore(client, hotelStore)
+		bookingStore = db.NewMongoBookingStore(client)
+		store        = &db.Store{
+			Hotel:   hotelStore,
+			Room:    roomStore,
+			User:    userStore,
+			Booking: bookingStore,
 		}
+		userHandler  = api.NewUserHandler(store)
+		authHandler  = api.NewAuthHandler(userStore)
 		hotelHandler = api.NewHotelHandler(store)
+		roomHandler  = api.NewRoomHandler(store)
 
-		app   = fiber.New(config)
-		apiv1 = app.Group("/api/v1")
+		app      = fiber.New(config)
+		api      = app.Group("/api")
+		adminApi = app.Group("/admin/api", middleware.JWTAuthentication(userStore))
 	)
 
-	apiv1.Get("/user", userHandler.HandleGetUsers)
-	apiv1.Get("/user/:id", userHandler.HandleGetUser)
-	apiv1.Post("/user", userHandler.HandlePostUser)
-	apiv1.Delete("/user/:id", userHandler.HandleDeleteUser)
-	apiv1.Patch("/user/:id", userHandler.HandleUpdateUser)
+	api.Post("/login", authHandler.HandleLogin)
 
-	apiv1.Get("/hotel", hotelHandler.HandleGetHotels)
-	apiv1.Get("/hotel/:id", hotelHandler.HandleGetHotel)
-	apiv1.Get("/hotel/:id/rooms", hotelHandler.HandleGetRooms)
+	adminApi.Get("/user", userHandler.HandleGetUsers)
+	adminApi.Get("/user/:id", userHandler.HandleGetUser)
+	adminApi.Post("/user", userHandler.HandlePostUser)
+	adminApi.Delete("/user/:id", userHandler.HandleDeleteUser)
+	adminApi.Patch("/user/:id", userHandler.HandleUpdateUser)
+
+	adminApi.Get("/hotel", hotelHandler.HandleGetHotels)
+	adminApi.Get("/hotel/:id", hotelHandler.HandleGetHotel)
+	adminApi.Get("/hotel/:id/rooms", hotelHandler.HandleGetRooms)
+
+	adminApi.Post("/room/:id/book", roomHandler.HandleBookRoom)
+	adminApi.Get("/room/booking", roomHandler.HandleGetBookings)
 
 	app.Listen(*listenAddr)
 }

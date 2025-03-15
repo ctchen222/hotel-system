@@ -53,7 +53,6 @@ func (s *MongoHotelStore) GetHotels(ctx context.Context, filter bson.M) ([]*type
 		return nil, err
 	}
 	return hotels, nil
-
 }
 
 func (s *MongoHotelStore) GetHotelById(ctx context.Context, id string) (*types.Hotel, error) {

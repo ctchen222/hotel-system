@@ -3,18 +3,20 @@ package db
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
 const (
-	DBNAME     = "hotel-reservation"
-	DBTESTNAME = "hotel-reservation-test"
-	DBURI      = "mongodb://localhost:27017"
-	userColl   = "users"
-	hotelColl  = "hotels"
-	roomColl   = "rooms"
+	DBNAME      = "hotel-reservation"
+	DBTESTNAME  = "hotel-reservation-test"
+	DBURI       = "mongodb://localhost:27017"
+	userColl    = "users"
+	hotelColl   = "hotels"
+	roomColl    = "rooms"
+	bookingColl = "booking"
 )
 
 type Store struct {
-	User  UserStore
-	Hotel HotelStore
-	Room  RoomStore
+	User    UserStore
+	Hotel   HotelStore
+	Room    RoomStore
+	Booking BookingStore
 }
 
 func ToObjectId(id string) primitive.ObjectID {
