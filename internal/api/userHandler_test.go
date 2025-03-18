@@ -9,7 +9,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/ctchen1999/hotel-system/db"
+	"github.com/ctchen1999/hotel-system/internal/db"
+	"github.com/ctchen1999/hotel-system/internal/types"
+	"github.com/go-faker/faker/v4"
+	"github.com/gofiber/fiber/v2"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 

@@ -14,3 +14,15 @@ type HotelQuery struct {
 	Rooms  bool
 	Rating int
 }
+
+type CreateHotelParams struct {
+	Name     string `json:"name"`
+	Location string `json:"location"`
+	Rating   int    `json:"rating"`
+}
+
+type HotelUpdateParams struct {
+	Name     string `json:"name"`
+	Location string `json:"location"`
+	Rating   int    `json:"rating"`
+}

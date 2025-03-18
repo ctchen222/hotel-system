@@ -1,12 +1,12 @@
 package api
 
 import (
-	"context"
 	"errors"
 	"fmt"
 
-	"github.com/ctchen1999/hotel-system/db"
-	"github.com/ctchen1999/hotel-system/types"
+	"github.com/ctchen1999/hotel-system/internal/db"
+	"github.com/ctchen1999/hotel-system/internal/response"
+	"github.com/ctchen1999/hotel-system/internal/types"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -23,11 +23,10 @@ func NewUserHandler(store *db.Store) *UserHandler {
 
 func (h *UserHandler) HandleGetUser(c *fiber.Ctx) error {
 	var (
-		id  = c.Params("id")
-		ctx = context.Background()
+		id = c.Params("id")
 	)
 
-	user, err := h.store.User.GetUserById(ctx, id)
+	user, err := h.store.User.GetUserById(c.Context(), id)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			fmt.Println("no user found")
@@ -35,7 +34,8 @@ func (h *UserHandler) HandleGetUser(c *fiber.Ctx) error {
 		}
 		return err
 	}
-	return c.JSON(user)
+
+	return response.SuccessResponse(c, user)
 }
 
 func (h *UserHandler) HandleGetUsers(c *fiber.Ctx) error {
@@ -44,7 +44,7 @@ func (h *UserHandler) HandleGetUsers(c *fiber.Ctx) error {
 		return err
 	}
 
-	return c.JSON(users)
+	return response.SuccessResponse(c, users)
 }
 
 func (h *UserHandler) HandlePostUser(c *fiber.Ctx) error {
@@ -54,7 +54,7 @@ func (h *UserHandler) HandlePostUser(c *fiber.Ctx) error {
 	}
 	// validate the input
 	if validationErrors := params.Validate(); len(validationErrors) > 0 {
-		return c.JSON(fiber.Map{"errors": validationErrors})
+		return response.ErrorResponse(c, validationErrors)
 	}
 
 	user, err := types.NewUserFromParams(params)
@@ -67,11 +67,7 @@ func (h *UserHandler) HandlePostUser(c *fiber.Ctx) error {
 		return err
 	}
 
-	return c.JSON(createdUser)
-}
-
-func (h *UserHandler) HandlePutUser(c *fiber.Ctx) error {
-	return nil
+	return response.SuccessResponse(c, createdUser)
 }
 
 func (h *UserHandler) HandleDeleteUser(c *fiber.Ctx) error {
@@ -80,7 +76,7 @@ func (h *UserHandler) HandleDeleteUser(c *fiber.Ctx) error {
 		return err
 	}
 
-	return c.JSON(fiber.Map{"message": "user deleted"})
+	return response.SuccessResponse(c, fiber.Map{"message": "user deleted"})
 }
 
 func (h *UserHandler) HandleUpdateUser(c *fiber.Ctx) error {
@@ -88,12 +84,12 @@ func (h *UserHandler) HandleUpdateUser(c *fiber.Ctx) error {
 	userId := c.Params("id")
 
 	if err := c.BodyParser(&params); err != nil {
-		return nil
+		return err
 	}
 
 	if err := h.store.User.Update(c.Context(), params, userId); err != nil {
 		return err
 	}
 
-	return c.JSON(fiber.Map{"message": "user updated"})
+	return response.SuccessResponse(c, fiber.Map{"message": "user updated"})
 }

@@ -6,8 +6,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/ctchen1999/hotel-system/db"
-	"github.com/ctchen1999/hotel-system/types"
+	"github.com/ctchen1999/hotel-system/internal/db"
+	"github.com/ctchen1999/hotel-system/internal/response"
+	"github.com/ctchen1999/hotel-system/internal/types"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -48,7 +49,7 @@ func (a *AuthHandler) HandleLogin(c *fiber.Ctx) error {
 
 	fmt.Println("User logged in ->", user.FirstName, user.LastName)
 
-	return c.JSON(resp)
+	return response.SuccessResponse(c, resp)
 }
 
 func GenerateToken(user *types.User) string {

@@ -3,29 +3,42 @@ package middleware
 import (
 	"fmt"
 	"os"
+	"strings"
+	"time"
 
-	"github.com/ctchen1999/hotel-system/db"
+	"github.com/ctchen1999/hotel-system/internal/db"
+	"github.com/ctchen1999/hotel-system/internal/response"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 )
 
 func JWTAuthentication(userStore db.UserStore) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		token, ok := c.GetReqHeaders()["X-Api-Token"]
-		fmt.Println("token", token)
-		if !ok {
-			return fmt.Errorf("unAuthorized")
+		// get token from bearer
+		authHeader := c.Get("Authorization")
+		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+			return response.ErrUnAuthorized()
+		}
+		token := strings.TrimPrefix(authHeader, "Bearer ")
+
+		claims, err := validateToken(token)
+		if err != nil {
+			return response.ErrUnAuthorized()
 		}
 
-		claims, err := validateToken(token[0])
+		expires, err := time.Parse(time.RFC3339, claims["expires"].(string))
 		if err != nil {
-			return fmt.Errorf("unAuthorized")
+			return response.ErrUnAuthorized()
+		}
+
+		if time.Now().After(expires) {
+			return response.ErrUnAuthorized()
 		}
 
 		userId := claims["id"]
 		user, err := userStore.GetUserById(c.Context(), userId.(string))
 		if err != nil {
-			return fmt.Errorf("unAuthorized")
+			return response.ErrUnAuthorized()
 		}
 
 		c.Context().SetUserValue("user", user)

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ctchen1999/hotel-system/types"
+	"github.com/ctchen1999/hotel-system/internal/types"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"

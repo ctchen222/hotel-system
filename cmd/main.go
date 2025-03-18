@@ -4,10 +4,12 @@ import (
 	"context"
 	"flag"
 	"log"
+	"net/http"
 
-	"github.com/ctchen1999/hotel-system/api"
-	"github.com/ctchen1999/hotel-system/api/middleware"
-	"github.com/ctchen1999/hotel-system/db"
+	"github.com/ctchen1999/hotel-system/internal/api"
+	"github.com/ctchen1999/hotel-system/internal/api/middleware"
+	"github.com/ctchen1999/hotel-system/internal/db"
+	"github.com/ctchen1999/hotel-system/internal/response"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -15,12 +17,13 @@ import (
 
 var config = fiber.Config{
 	ErrorHandler: func(c *fiber.Ctx, err error) error {
-		code := fiber.StatusInternalServerError
-		if e, ok := err.(*fiber.Error); ok {
-			code = e.Code
+		if apiError, ok := err.(response.Error); ok {
+			return c.Status(apiError.Code).JSON(apiError)
 		}
-		return c.Status(code).JSON(fiber.Map{"error": err.Error()})
+		apiError := response.NewError(http.StatusInternalServerError, err.Error())
+		return c.Status(apiError.Code).JSON(apiError)
 	},
+	BodyLimit: 10 * 1024 * 1024,
 }
 
 func main() {
@@ -55,15 +58,17 @@ func main() {
 	)
 
 	api.Post("/login", authHandler.HandleLogin)
+	api.Post("/register", userHandler.HandlePostUser)
 
 	adminApi.Get("/user", userHandler.HandleGetUsers)
 	adminApi.Get("/user/:id", userHandler.HandleGetUser)
-	adminApi.Post("/user", userHandler.HandlePostUser)
 	adminApi.Delete("/user/:id", userHandler.HandleDeleteUser)
 	adminApi.Patch("/user/:id", userHandler.HandleUpdateUser)
 
+	adminApi.Post("/hotel", hotelHandler.HandlePostHotel)
 	adminApi.Get("/hotel", hotelHandler.HandleGetHotels)
 	adminApi.Get("/hotel/:id", hotelHandler.HandleGetHotel)
+	adminApi.Put("/hotel/:id", hotelHandler.HandleUpdateHotel)
 	adminApi.Get("/hotel/:id/rooms", hotelHandler.HandleGetRooms)
 
 	adminApi.Post("/room/:id/book", roomHandler.HandleBookRoom)

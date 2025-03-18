@@ -2,16 +2,18 @@ package db
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/ctchen1999/hotel-system/types"
+	"github.com/ctchen1999/hotel-system/internal/types"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type HotelStore interface {
+	Create(context.Context, *types.Hotel) (*types.Hotel, error)
 	Insert(context.Context, *types.Hotel) (*types.Hotel, error)
-	Update(ctx context.Context, filter bson.M, update bson.M) error
+	Update(ctx context.Context, params types.HotelUpdateParams, id string) error
 	GetHotels(context.Context, bson.M) ([]*types.Hotel, error)
 	GetHotelById(context.Context, string) (*types.Hotel, error)
 }
@@ -28,6 +30,24 @@ func NewMongoHotelStore(client *mongo.Client) *MongoHotelStore {
 	}
 }
 
+func (s *MongoHotelStore) Create(ctx context.Context, hotel *types.Hotel) (*types.Hotel, error) {
+	var existedHotel types.Hotel
+	err := s.coll.FindOne(ctx, bson.M{"name": hotel.Name}).Decode(&existedHotel)
+	if err == nil {
+		return nil, fmt.Errorf("hotel already exists")
+	}
+	if err != mongo.ErrNoDocuments {
+		return nil, err
+	}
+
+	res, err := s.coll.InsertOne(ctx, hotel)
+	if err != nil {
+		return nil, err
+	}
+	hotel.Id = res.InsertedID.(primitive.ObjectID)
+	return hotel, nil
+}
+
 func (s *MongoHotelStore) Insert(ctx context.Context, hotel *types.Hotel) (*types.Hotel, error) {
 	resp, err := s.coll.InsertOne(ctx, hotel)
 	if err != nil {
@@ -37,8 +57,25 @@ func (s *MongoHotelStore) Insert(ctx context.Context, hotel *types.Hotel) (*type
 	return hotel, nil
 }
 
-func (s *MongoHotelStore) Update(ctx context.Context, filter bson.M, update bson.M) error {
-	_, err := s.coll.UpdateOne(ctx, filter, update)
+func (s *MongoHotelStore) Update(ctx context.Context, params types.HotelUpdateParams, id string) error {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+	filter := bson.M{"_id": oid}
+	update := bson.M{
+		"$set": bson.M{
+			"name":     params.Name,
+			"location": params.Location,
+			"rating":   params.Rating,
+		},
+	}
+
+	_, err = s.coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
 	return err
 }
 

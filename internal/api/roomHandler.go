@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ctchen1999/hotel-system/db"
-	"github.com/ctchen1999/hotel-system/types"
+	"github.com/ctchen1999/hotel-system/internal/db"
+	"github.com/ctchen1999/hotel-system/internal/types"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
