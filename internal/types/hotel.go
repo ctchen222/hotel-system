@@ -10,6 +10,14 @@ type Hotel struct {
 	Rating   int                  `bson:"rating" json:"rating"`
 }
 
+type HotelEmbed struct {
+	Id       primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
+	Name     string             `bson:"name" json:"name"`
+	Location string             `bson:"location" json:"location"`
+	Rooms    []Room             `bson:"rooms" json:"rooms"`
+	Rating   int                `bson:"rating" json:"rating"`
+}
+
 type HotelQuery struct {
 	Rooms  bool
 	Rating int

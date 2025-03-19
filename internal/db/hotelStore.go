@@ -14,8 +14,8 @@ type HotelStore interface {
 	Create(context.Context, *types.Hotel) (*types.Hotel, error)
 	Insert(context.Context, *types.Hotel) (*types.Hotel, error)
 	Update(ctx context.Context, params types.HotelUpdateParams, id string) error
-	GetHotels(context.Context, bson.M) ([]*types.Hotel, error)
-	GetHotelById(context.Context, string) (*types.Hotel, error)
+	GetHotels(ctx context.Context, filter bson.M) ([]*types.Hotel, error)
+	GetHotelById(context.Context, string) (*types.HotelEmbed, error)
 }
 
 type MongoHotelStore struct {
@@ -92,15 +92,34 @@ func (s *MongoHotelStore) GetHotels(ctx context.Context, filter bson.M) ([]*type
 	return hotels, nil
 }
 
-func (s *MongoHotelStore) GetHotelById(ctx context.Context, id string) (*types.Hotel, error) {
+func (s *MongoHotelStore) GetHotelById(ctx context.Context, id string) (*types.HotelEmbed, error) {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
 	}
 
-	var hotel *types.Hotel
-	if err := s.coll.FindOne(ctx, bson.M{"_id": oid}).Decode(&hotel); err != nil {
+	// var hotel []*types.Hotel
+	var hotel *types.HotelEmbed
+	pipeline := mongo.Pipeline{
+		bson.D{{Key: "$match", Value: bson.M{"_id": oid}}},
+		bson.D{{Key: "$lookup", Value: bson.D{
+			{Key: "from", Value: "rooms"},
+			{Key: "localField", Value: "_id"},
+			{Key: "foreignField", Value: "hotelId"},
+			{Key: "as", Value: "rooms"},
+		}}},
+		bson.D{{Key: "$match", Value: bson.M{"rooms": bson.M{"$ne": bson.A{}}}}},
+	}
+	cur, err := s.coll.Aggregate(ctx, pipeline)
+	if err != nil {
 		return nil, err
 	}
+
+	if cur.Next(ctx) {
+		if err := cur.Decode(&hotel); err != nil {
+			return nil, err
+		}
+	}
+
 	return hotel, nil
 }
