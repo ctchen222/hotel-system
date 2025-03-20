@@ -3,7 +3,6 @@ package api_test
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http/httptest"
 	"testing"
 
@@ -167,7 +166,6 @@ func (suite *UserSuiteHandler) TestUserHandler_HandleUpdateUser() {
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, _ := app.Test(req)
-	fmt.Println("resp", resp)
 	assert.Equal(suite.T(), 200, resp.StatusCode)
 }
 
