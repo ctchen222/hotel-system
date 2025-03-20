@@ -1,11 +1,11 @@
 package api
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/ctchen1999/hotel-system/internal/db"
+	"github.com/ctchen1999/hotel-system/internal/response"
 	"github.com/ctchen1999/hotel-system/internal/types"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
@@ -23,25 +23,25 @@ func NewRoomHandler(store *db.Store) *RoomHandler {
 }
 
 func (h *RoomHandler) HandleBookRoom(c *fiber.Ctx) error {
-	var rawParams types.BooingRawParams
-	if err := json.Unmarshal(c.BodyRaw(), &rawParams); err != nil {
-		return c.JSON(fiber.Map{"error": "Invalid request body"})
+	var rawParams types.BookingRawParams
+	if err := c.BodyParser(&rawParams); err != nil {
+		return err
 	}
 
 	loc, err := time.LoadLocation("Asia/Taipei")
 	if err != nil {
-		return c.JSON(fiber.Map{"error": "Invalid location"})
+		return response.ErrInvalidLocation()
 	}
 
 	from, err := time.Parse("2006-01-02", rawParams.From)
 	if err != nil {
-		return c.JSON(fiber.Map{"error": "Invalid from date"})
+		return response.ErrInvalidDate()
 	}
 	from = from.In(loc)
 
 	to, err := time.Parse("2006-01-02", rawParams.To)
 	if err != nil {
-		return c.JSON(fiber.Map{"error": "Invalid to date"})
+		return response.ErrInvalidDate()
 	}
 	to = to.In(loc)
 
@@ -51,7 +51,7 @@ func (h *RoomHandler) HandleBookRoom(c *fiber.Ctx) error {
 		NumPerson: rawParams.NumPerson,
 	}
 	if validationErrors := params.Validate(); len(validationErrors) > 0 {
-		return c.JSON(fiber.Map{"errors": validationErrors})
+		return response.ErrorResponse(c, validationErrors)
 	}
 
 	roomId, err := primitive.ObjectIDFromHex(c.Params("id"))
@@ -61,7 +61,7 @@ func (h *RoomHandler) HandleBookRoom(c *fiber.Ctx) error {
 
 	user, ok := c.Context().UserValue("user").(*types.User)
 	if !ok {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Internal Server Error"})
+		return response.ErrUnAuthenticated()
 	}
 
 	filter := bson.M{
@@ -74,15 +74,11 @@ func (h *RoomHandler) HandleBookRoom(c *fiber.Ctx) error {
 		},
 	}
 	bookings, err := h.store.Booking.GetBookings(c.Context(), filter)
-	fmt.Print("bookings", bookings)
 	if err != nil {
 		return err
 	}
 	if len(bookings) > 0 {
-		return c.JSON(fiber.Map{
-			"Type": "error",
-			"Msg":  fmt.Sprintf("room %s has been booked", roomId),
-		})
+		return response.ErrorResponse(c, fmt.Sprintf("Room %s is already booked", roomId.Hex()))
 	}
 
 	booking := types.Booking{
@@ -98,7 +94,7 @@ func (h *RoomHandler) HandleBookRoom(c *fiber.Ctx) error {
 		return err
 	}
 
-	return c.JSON(bookedRoom)
+	return response.SuccessResponse(c, bookedRoom)
 }
 
 func (h *RoomHandler) HandleGetBookings(c *fiber.Ctx) error {
@@ -106,12 +102,11 @@ func (h *RoomHandler) HandleGetBookings(c *fiber.Ctx) error {
 	if err := c.QueryParser(&query); err != nil {
 		return err
 	}
-	fmt.Println("query", query)
 
 	bookings, err := h.store.Booking.GetBookings(c.Context(), bson.M{})
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(bookings)
+	return response.SuccessResponse(c, bookings)
 }

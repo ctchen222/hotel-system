@@ -37,7 +37,7 @@ func (p *BookingParams) Validate() map[string]string {
 	return errors
 }
 
-type BooingRawParams struct {
+type BookingRawParams struct {
 	From      string `json:"from"`
 	To        string `json:"to"`
 	NumPerson int    `json:"numPerson"`

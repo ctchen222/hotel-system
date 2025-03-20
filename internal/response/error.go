@@ -37,3 +37,11 @@ func ErrBadRequest() Error {
 func ErrResourceNotFound() Error {
 	return NewError(http.StatusBadRequest, "Resource not found")
 }
+
+func ErrInvalidLocation() Error {
+	return NewError(http.StatusBadRequest, "Invalid location")
+}
+
+func ErrInvalidDate() Error {
+	return NewError(http.StatusBadRequest, "Invalid date")
+}

@@ -9,7 +9,7 @@ const (
 	userColl    = "users"
 	hotelColl   = "hotels"
 	roomColl    = "rooms"
-	bookingColl = "booking"
+	bookingColl = "bookings"
 )
 
 type Store struct {
