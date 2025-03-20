@@ -2,7 +2,6 @@ package api
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/ctchen1999/hotel-system/internal/db"
 	"github.com/ctchen1999/hotel-system/internal/response"
@@ -29,8 +28,7 @@ func (h *UserHandler) HandleGetUser(c *fiber.Ctx) error {
 	user, err := h.store.User.GetUserById(c.Context(), id)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			fmt.Println("no user found")
-			return c.JSON(fiber.Map{"error": "no users found"})
+			return response.ErrResourceNotFound()
 		}
 		return err
 	}

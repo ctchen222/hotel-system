@@ -39,7 +39,6 @@ func (h *HotelHandler) HandlePostHotel(c *fiber.Ctx) error {
 }
 
 func (h *HotelHandler) HandleGetHotels(c *fiber.Ctx) error {
-	//TODO: Implement query for hotels
 	var query types.HotelQuery
 	if err := c.QueryParser(&query); err != nil {
 		return err
