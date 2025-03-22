@@ -61,8 +61,10 @@ func GenerateToken(user *types.User) string {
 		"expires": expires,
 	}
 
+	// header + payload
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	secret := os.Getenv("JWT_SECRET")
+	// sign token with secret -> hash_alg(header + payload + secret)
 	tokenStr, err := token.SignedString([]byte(secret))
 	if err != nil {
 		fmt.Println("Failed to sign token with secret")

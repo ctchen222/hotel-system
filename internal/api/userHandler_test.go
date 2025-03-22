@@ -3,6 +3,7 @@ package api_test
 import (
 	"bytes"
 	"encoding/json"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
@@ -129,7 +130,7 @@ func (suite *UserSuiteHandler) TestUserHandler_HandlePostUser() {
 
 	app := fiber.New()
 	app.Post("/users", suite.userHandler.HandlePostUser)
-	req := httptest.NewRequest("POST", "/users", bytes.NewReader(userBody))
+	req := httptest.NewRequest(http.MethodPost, "/users", bytes.NewReader(userBody))
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, _ := app.Test(req)
