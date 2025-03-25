@@ -1,7 +1,6 @@
 package api_test
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -71,11 +70,11 @@ func (suite *RoomSuiteHandler) TestRoomHandler_HandleGetBookings() {
 		suite.bookings, nil).AnyTimes()
 
 	app := fiber.New()
-	app.Get("/room/bookings", suite.roomHandler.HandleGetBookings)
+	app.Get("/room/booking", suite.roomHandler.HandleGetBookings)
 
-	req := httptest.NewRequest(http.MethodGet, "/room/bookings", nil)
+	req := httptest.NewRequest(http.MethodGet, "/room/booking", nil)
 	resp, _ := app.Test(req)
-	fmt.Println(resp)
+	suite.Equal(http.StatusOK, resp.StatusCode)
 }
 
 func TestRoomSuiteHandler(t *testing.T) {
