@@ -1,6 +1,7 @@
 package types
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -69,7 +70,7 @@ func Test_isEmailValid(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := isEmailValid(tt.args.email); got != tt.want {
+			if got := IsEmailValid(tt.args.email); got != tt.want {
 				t.Errorf("isEmailValid() = %v, want %v", got, tt.want)
 			}
 		})
@@ -119,6 +120,98 @@ func TestNewUserFromParams(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewUserFromParams() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestCreateUserParams_Validate(t *testing.T) {
+	type fields struct {
+		FirstName string
+		LastName  string
+		Email     string
+		Password  string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   map[string]string
+	}{
+		{
+			name: "Valid User",
+			fields: fields{
+				FirstName: "TestFirstName",
+				LastName:  "TestLastName",
+				Email:     "Twobao@gmail.com",
+				Password:  "TestPassword",
+			},
+			want: map[string]string{},
+		},
+		{
+			name: "InValid User",
+			fields: fields{
+				FirstName: "TestFirstName",
+				LastName:  "",
+				Email:     "Twobao@gmail.com",
+				Password:  "TestPassword",
+			},
+			want: map[string]string{
+				"lastName": fmt.Sprintf("lastName must be at least %d characters long", MinFirstNameLength),
+			},
+		},
+		{
+			name: "InValid User",
+			fields: fields{
+				FirstName: "TestFirstName",
+				LastName:  "",
+				Email:     "",
+				Password:  "TestPassword",
+			},
+			want: map[string]string{
+				"lastName": fmt.Sprintf("lastName must be at least %d characters long", MinLastNameLength),
+				"email":    "email is invalid",
+			},
+		},
+		{
+			name: "InValid User",
+			fields: fields{
+				FirstName: "TestFirstName",
+				LastName:  "",
+				Email:     "",
+				Password:  "",
+			},
+			want: map[string]string{
+				"lastName": fmt.Sprintf("lastName must be at least %d characters long", MinLastNameLength),
+				"email":    "email is invalid",
+				"password": fmt.Sprintf("password must be at least %d characters long", MinPasswordLength),
+			},
+		},
+		{
+			name: "InValid User",
+			fields: fields{
+				FirstName: "",
+				LastName:  "",
+				Email:     "",
+				Password:  "",
+			},
+			want: map[string]string{
+				"firstName": fmt.Sprintf("firstName must be at least %d characters long", MinFirstNameLength),
+				"lastName":  fmt.Sprintf("lastName must be at least %d characters long", MinLastNameLength),
+				"email":     "email is invalid",
+				"password":  fmt.Sprintf("password must be at least %d characters long", MinPasswordLength),
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			params := CreateUserParams{
+				FirstName: tt.fields.FirstName,
+				LastName:  tt.fields.LastName,
+				Email:     tt.fields.Email,
+				Password:  tt.fields.Password,
+			}
+			if got := params.Validate(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("CreateUserParams.Validate() = %v, want %v", got, tt.want)
 			}
 		})
 	}

@@ -9,10 +9,9 @@ import (
 )
 
 const (
-	bcryptCost         = 10
-	minFirstNameLength = 2
-	minLastNameLength  = 2
-	minPasswordLength  = 7
+	MinFirstNameLength = 2
+	MinLastNameLength  = 2
+	MinPasswordLength  = 7
 )
 
 type CreateUserParams struct {
@@ -24,22 +23,22 @@ type CreateUserParams struct {
 
 func (params CreateUserParams) Validate() map[string]string {
 	errors := map[string]string{}
-	if len(params.FirstName) < minFirstNameLength {
-		errors["lastName"] = fmt.Sprintf("firstName must be at least %d characters long", minFirstNameLength)
+	if len(params.FirstName) < MinFirstNameLength {
+		errors["firstName"] = fmt.Sprintf("firstName must be at least %d characters long", MinFirstNameLength)
 	}
-	if len(params.LastName) < minLastNameLength {
-		errors["firstName"] = fmt.Sprintf("lastName must be at least %d characters long", minLastNameLength)
+	if len(params.LastName) < MinLastNameLength {
+		errors["lastName"] = fmt.Sprintf("lastName must be at least %d characters long", MinLastNameLength)
 	}
-	if len(params.Password) < minPasswordLength {
-		errors["password"] = fmt.Sprintf("password must be at least %d characters long", minPasswordLength)
+	if len(params.Password) < MinPasswordLength {
+		errors["password"] = fmt.Sprintf("password must be at least %d characters long", MinPasswordLength)
 	}
-	if !isEmailValid(params.Email) {
+	if !IsEmailValid(params.Email) {
 		errors["email"] = "email is invalid"
 	}
 	return errors
 }
 
-func isEmailValid(email string) bool {
+func IsEmailValid(email string) bool {
 	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 	return emailRegex.MatchString(email)
 }
@@ -62,7 +61,7 @@ type UserUpdateParams struct {
 }
 
 func NewUserFromParams(params CreateUserParams) (*User, error) {
-	encpw, err := bcrypt.GenerateFromPassword([]byte(params.Password), bcryptCost)
+	encpw, err := bcrypt.GenerateFromPassword([]byte(params.Password), bcrypt.DefaultCost)
 
 	if err != nil {
 		return nil, err
