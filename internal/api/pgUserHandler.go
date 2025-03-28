@@ -1,6 +1,8 @@
 package api
 
 import (
+	"fmt"
+
 	models "github.com/ctchen1999/hotel-system/internal/pg"
 	"github.com/ctchen1999/hotel-system/internal/pgtypes"
 	"github.com/ctchen1999/hotel-system/internal/response"
@@ -18,6 +20,7 @@ func NewPgUserHandler(userStore models.PgUserStore) *PgUserHandler {
 }
 
 func (h *PgUserHandler) HandleGetUsers(c *fiber.Ctx) error {
+	fmt.Println("HandleGetUsers")
 	users, err := h.userStore.GetUsers(c.Context())
 	if err != nil {
 		return err

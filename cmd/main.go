@@ -51,18 +51,20 @@ func main() {
 
 		pgUserHandler  = api.NewPgUserHandler(pgUserStore)
 		pgHotelHandler = api.NewPgHotelHandler(pgHotelStore)
+		pgAuthHandler  = api.NewPgAuthHandler(pgUserStore)
 
 		userHandler  = api.NewUserHandler(store)
 		authHandler  = api.NewAuthHandler(userStore)
 		hotelHandler = api.NewHotelHandler(store)
 		roomHandler  = api.NewRoomHandler(store)
 
-		app      = fiber.New(config)
-		api      = app.Group("/api")
-		pgApi    = app.Group("/api/pg")
-		adminApi = app.Group("/admin/api", middleware.JWTAuthentication(userStore))
+		app        = fiber.New(config)
+		api        = app.Group("/api")
+		adminPgApi = app.Group("/admin/pg", middleware.PgJWTAuthentication(pgUserStore))
+		adminApi   = app.Group("/admin/api", middleware.MongoJWTAuthentication(userStore))
 	)
 
+	// MONGODB
 	api.Post("/login", authHandler.HandleLogin)
 	api.Post("/register", userHandler.HandlePostUser)
 
@@ -80,17 +82,20 @@ func main() {
 	adminApi.Post("/room/:id/book", roomHandler.HandleBookRoom)
 	adminApi.Get("/room/booking", roomHandler.HandleGetBookings)
 
-	pgApi.Get("/user", pgUserHandler.HandleGetUsers)
-	pgApi.Get("/user/:id", pgUserHandler.HandleGetUser)
-	pgApi.Delete("/user/:id", pgUserHandler.HandleDeleteUser)
-	pgApi.Post("/user", pgUserHandler.HandleCreateUser)
-	pgApi.Patch("/user/:id", pgUserHandler.HandleUpdateUser)
+	// POSTGRES
+	api.Post("/pg/login", pgAuthHandler.HandleLogin)
 
-	pgApi.Post("/hotel", pgHotelHandler.HandleCreateHotel)
-	pgApi.Get("/hotel", pgHotelHandler.HandleGetHotels)
-	pgApi.Get("/hotel/:id", pgHotelHandler.HandleGetHotel)
-	pgApi.Patch("/hotel/:id", pgHotelHandler.HandleUpdateHotel)
-	pgApi.Delete("/hotel/:id", pgHotelHandler.HandlerDeleteHotel)
+	adminPgApi.Get("/user", pgUserHandler.HandleGetUsers)
+	adminPgApi.Get("/user/:id", pgUserHandler.HandleGetUser)
+	adminPgApi.Delete("/user/:id", pgUserHandler.HandleDeleteUser)
+	adminPgApi.Post("/user", pgUserHandler.HandleCreateUser)
+	adminPgApi.Patch("/user/:id", pgUserHandler.HandleUpdateUser)
+
+	adminPgApi.Post("/hotel", pgHotelHandler.HandleCreateHotel)
+	adminPgApi.Get("/hotel", pgHotelHandler.HandleGetHotels)
+	adminPgApi.Get("/hotel/:id", pgHotelHandler.HandleGetHotel)
+	adminPgApi.Patch("/hotel/:id", pgHotelHandler.HandleUpdateHotel)
+	adminPgApi.Delete("/hotel/:id", pgHotelHandler.HandlerDeleteHotel)
 
 	app.Listen(*listenAddr)
 }

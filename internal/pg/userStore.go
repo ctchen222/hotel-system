@@ -10,6 +10,7 @@ import (
 type PgUserStore interface {
 	GetUsers(context.Context) ([]*pgtypes.PGUser, error)
 	GetUserById(ctx context.Context, id string) (*pgtypes.PGUser, error)
+	GetUserByEmail(ctx context.Context, email string) (*pgtypes.PGUser, error)
 	CreateUser(ctx context.Context, user *pgtypes.PGUser) error
 	DeleteUser(ctx context.Context, id string) error
 	UpdateUser(ctx context.Context, user *pgtypes.UpdateUserParams, id string) error
@@ -56,6 +57,18 @@ func (s *PostgresUserStore) GetUserById(ctx context.Context, id string) (*pgtype
 	var user pgtypes.PGUser
 	if err := row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email); err != nil {
 		log.Printf("Error scanning user: %v", err)
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (s *PostgresUserStore) GetUserByEmail(ctx context.Context, email string) (*pgtypes.PGUser, error) {
+	query := `SELECT id, firstname, lastname, email, encrypted_password FROM users WHERE email = $1`
+
+	var user pgtypes.PGUser
+	row := s.pool.DB.QueryRow(ctx, query, email)
+	if err := row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.EncryptedPassword); err != nil {
 		return nil, err
 	}
 

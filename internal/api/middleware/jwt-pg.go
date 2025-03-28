@@ -6,22 +6,23 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ctchen1999/hotel-system/internal/db"
+	models "github.com/ctchen1999/hotel-system/internal/pg"
 	"github.com/ctchen1999/hotel-system/internal/response"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func JWTAuthentication(userStore db.UserStore) fiber.Handler {
+func PgJWTAuthentication(userStore models.PgUserStore) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		// get token from bearer
 		authHeader := c.Get("Authorization")
+		fmt.Println("authHeader", authHeader)
 		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
 			return response.ErrUnAuthorized()
 		}
 		token := strings.TrimPrefix(authHeader, "Bearer ")
 
-		claims, err := validateToken(token)
+		claims, err := pgvalidatetoken(token)
 		if err != nil {
 			return response.ErrUnAuthorized()
 		}
@@ -36,6 +37,7 @@ func JWTAuthentication(userStore db.UserStore) fiber.Handler {
 		}
 
 		userId := claims["id"]
+
 		user, err := userStore.GetUserById(c.Context(), userId.(string))
 		if err != nil {
 			return response.ErrUnAuthorized()
@@ -48,7 +50,7 @@ func JWTAuthentication(userStore db.UserStore) fiber.Handler {
 }
 
 // validate token
-func validateToken(tokenStr string) (jwt.MapClaims, error) {
+func pgvalidatetoken(tokenStr string) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (any, error) {
 		// Don't forget to validate the alg is what you expect:
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
