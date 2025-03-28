@@ -6,6 +6,6 @@ type AuthParams struct {
 }
 
 type AuthResponse struct {
-	User  *User  `json:"user"`
-	Token string `json:"token"`
+	User  *User  `json:"user,omitempty"`
+	Token string `json:"token,omitempty"`
 }

@@ -25,8 +25,6 @@ type UserStore interface {
 	Update(ctx context.Context, params types.UserUpdateParams, id string) error
 }
 
-type PostgresUserStore struct{}
-
 type MongoUserStore struct {
 	client *mongo.Client
 	coll   *mongo.Collection
