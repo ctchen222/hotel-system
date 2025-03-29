@@ -45,3 +45,7 @@ func ErrInvalidLocation() Error {
 func ErrInvalidDate() Error {
 	return NewError(http.StatusBadRequest, "Invalid date")
 }
+
+func ErrParseInt() Error {
+	return NewError(http.StatusBadRequest, "Parse Int from string")
+}

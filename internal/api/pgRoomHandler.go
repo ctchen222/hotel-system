@@ -44,3 +44,22 @@ func (h *PgRoomHandler) HandleCreateRoom(c *fiber.Ctx) error {
 
 	return response.SuccessResponse(c, "Room has been created.")
 }
+
+func (h *PgRoomHandler) HandleGetRoomById(c *fiber.Ctx) error {
+	roomId := c.Params("roomId")
+	room, err := h.roomStore.GetRoomById(c.Context(), roomId)
+	if err != nil {
+		return err
+	}
+
+	return response.SuccessResponse(c, room)
+}
+
+func (h *PgRoomHandler) HandleDeleteRoom(c *fiber.Ctx) error {
+	roomId := c.Params("roomId")
+	if err := h.roomStore.DeleteRoom(c.Context(), roomId); err != nil {
+		return err
+	}
+
+	return response.SuccessResponse(c, "Room has been deleted.")
+}

@@ -35,9 +35,10 @@ func main() {
 
 	// Handler initialization
 	var (
-		pgUserStore  = models.NewPostgresUserStore(pool)
-		pgHotelStore = models.NewPostgresHotelStore(pool)
-		pgRoomStore  = models.NewPostgresRoomStore(pool)
+		pgUserStore    = models.NewPostgresUserStore(pool)
+		pgHotelStore   = models.NewPostgresHotelStore(pool)
+		pgRoomStore    = models.NewPostgresRoomStore(pool)
+		pgBookingStore = models.NewPostgresBookingStore(pool)
 
 		userStore    = db.NewMongoUserStore(client)
 		hotelStore   = db.NewMongoHotelStore(client)
@@ -50,10 +51,11 @@ func main() {
 			Booking: bookingStore,
 		}
 
-		pgUserHandler  = api.NewPgUserHandler(pgUserStore)
-		pgHotelHandler = api.NewPgHotelHandler(pgHotelStore, pgRoomStore)
-		pgRoomHandler  = api.NewPgRoomHandler(pgRoomStore)
-		pgAuthHandler  = api.NewPgAuthHandler(pgUserStore)
+		pgUserHandler    = api.NewPgUserHandler(pgUserStore)
+		pgHotelHandler   = api.NewPgHotelHandler(pgHotelStore, pgRoomStore)
+		pgRoomHandler    = api.NewPgRoomHandler(pgRoomStore)
+		pgAuthHandler    = api.NewPgAuthHandler(pgUserStore)
+		pgBookingHandler = api.NewPgBookingHandler(pgBookingStore)
 
 		userHandler  = api.NewUserHandler(store)
 		authHandler  = api.NewAuthHandler(userStore)
@@ -101,7 +103,12 @@ func main() {
 	adminPgApi.Get("/hotel/:id/rooms", pgHotelHandler.HandleGetRooms)
 
 	adminPgApi.Post("/room/:hotelId", pgRoomHandler.HandleCreateRoom)
-	adminPgApi.Get("/room/:hotelId", pgRoomHandler.HandlerGetRooms)
+	adminPgApi.Get("/room/hotel/:hotelId", pgRoomHandler.HandlerGetRooms)
+	adminPgApi.Get("/room/:roomId", pgRoomHandler.HandleGetRoomById)
+	adminPgApi.Delete("/room/:roomId", pgRoomHandler.HandleDeleteRoom)
+
+	adminPgApi.Post("/booking/:roomId", pgBookingHandler.HandleCreateBooking)
+	adminPgApi.Get("/booking/user/:userId", pgBookingHandler.HandleGetBookingInfo)
 
 	app.Listen(*listenAddr)
 }

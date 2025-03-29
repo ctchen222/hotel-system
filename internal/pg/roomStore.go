@@ -9,6 +9,8 @@ import (
 type PgRoomStore interface {
 	CreateRoom(ctx context.Context, room pgtypes.CreateRoomParams, hotelId string) error
 	GetRooms(ctx context.Context, hotelId string) ([]*pgtypes.Room, error)
+	GetRoomById(ctx context.Context, roomId string) (*pgtypes.Room, error)
+	DeleteRoom(ctx context.Context, roomId string) error
 }
 
 type PostgresRoomStore struct {
@@ -57,4 +59,25 @@ func (s *PostgresRoomStore) GetRooms(ctx context.Context, hotelId string) ([]*pg
 	}
 
 	return rooms, nil
+}
+func (s *PostgresRoomStore) GetRoomById(ctx context.Context, roomId string) (*pgtypes.Room, error) {
+	query := `SELECT * FROM rooms WHERE id = $1`
+	row := s.pool.DB.QueryRow(ctx, query, roomId)
+
+	var room pgtypes.Room
+	err := row.Scan(&room.Id, &room.Size, &room.SeaSide, &room.Price, &room.HotelId)
+	if err != nil {
+		return nil, err
+	}
+
+	return &room, nil
+}
+
+func (s *PostgresRoomStore) DeleteRoom(ctx context.Context, roomId string) error {
+	query := `DELETE FROM rooms WHERE id = $1`
+	_, err := s.pool.DB.Exec(ctx, query, roomId)
+	if err != nil {
+		return err
+	}
+	return nil
 }
