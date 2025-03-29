@@ -16,7 +16,6 @@ func PgJWTAuthentication(userStore models.PgUserStore) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		// get token from bearer
 		authHeader := c.Get("Authorization")
-		fmt.Println("authHeader", authHeader)
 		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
 			return response.ErrUnAuthorized()
 		}

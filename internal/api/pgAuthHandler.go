@@ -55,7 +55,7 @@ func (a *PgAuthHandler) HandleLogin(c *fiber.Ctx) error {
 
 func PgGenerateToken(user *pgtypes.PGUser) string {
 	now := time.Now()
-	expires := now.Add(time.Hour * 1)
+	expires := now.Add(time.Hour * 24 * 7)
 	claims := jwt.MapClaims{
 		"id":      user.Id,
 		"email":   user.Email,

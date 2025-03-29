@@ -13,11 +13,11 @@ const (
 )
 
 type PGUser struct {
-	Id                string `db:"id,omitempty"`
-	FirstName         string `db:"firstname"`
-	LastName          string `db:"lastname"`
-	Email             string `db:"email"`
-	EncryptedPassword string `db:"encrypted_password"`
+	Id                string `db:"id,omitempty" json:"id,omitempty"`
+	FirstName         string `db:"firstname" json:"firstname"`
+	LastName          string `db:"lastname" json:"lastname"`
+	Email             string `db:"email" json:"email"`
+	EncryptedPassword string `db:"encrypted_password" json:"encrypted_password,omitempty"`
 }
 
 type UpdateUserParams struct {
@@ -26,10 +26,10 @@ type UpdateUserParams struct {
 }
 
 type CreateUserParams struct {
-	FirstName string `db:"firstname"`
-	LastName  string `db:"lastname"`
-	Email     string `db:"email"`
-	Password  string `db:"password"`
+	FirstName string `db:"firstname" json:"firstname"`
+	LastName  string `db:"lastname" json:"lastname"`
+	Email     string `db:"email" json:"email"`
+	Password  string `db:"password" json:"password"`
 }
 
 func (params CreateUserParams) Validate() map[string]string {

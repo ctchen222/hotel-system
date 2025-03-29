@@ -9,11 +9,13 @@ import (
 
 type PgHotelHandler struct {
 	hotelStore models.PgHotelStore
+	roomStore  models.PgRoomStore
 }
 
-func NewPgHotelHandler(hotelStore models.PgHotelStore) *PgHotelHandler {
+func NewPgHotelHandler(hotelStore models.PgHotelStore, roomStore models.PgRoomStore) *PgHotelHandler {
 	return &PgHotelHandler{
 		hotelStore: hotelStore,
+		roomStore:  roomStore,
 	}
 }
 
@@ -75,4 +77,15 @@ func (h *PgHotelHandler) HandlerDeleteHotel(c *fiber.Ctx) error {
 		return err
 	}
 	return response.SuccessResponse(c, "Hotel has been deleted.")
+}
+
+func (h *PgHotelHandler) HandleGetRooms(c *fiber.Ctx) error {
+	hotelId := c.Params("id")
+
+	rooms, err := h.roomStore.GetRooms(c.Context(), hotelId)
+	if err != nil {
+		return err
+	}
+
+	return response.SuccessResponse(c, rooms)
 }
