@@ -3,7 +3,7 @@ package models
 import (
 	"context"
 
-	"github.com/ctchen1999/hotel-system/internal/pgtypes"
+	"github.com/ctchen222/hotel-system/internal/pgtypes"
 )
 
 type PgHotelStore interface {

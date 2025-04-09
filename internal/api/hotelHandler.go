@@ -1,9 +1,9 @@
 package api
 
 import (
-	"github.com/ctchen1999/hotel-system/internal/db"
-	"github.com/ctchen1999/hotel-system/internal/response"
-	"github.com/ctchen1999/hotel-system/internal/types"
+	"github.com/ctchen222/hotel-system/internal/db"
+	"github.com/ctchen222/hotel-system/internal/response"
+	"github.com/ctchen222/hotel-system/internal/types"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

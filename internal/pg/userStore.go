@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/ctchen1999/hotel-system/internal/pgtypes"
+	"github.com/ctchen222/hotel-system/internal/pgtypes"
 )
 
 type PgUserStore interface {

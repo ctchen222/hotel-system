@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ctchen1999/hotel-system/internal/db"
-	"github.com/ctchen1999/hotel-system/internal/response"
+	"github.com/ctchen222/hotel-system/internal/db"
+	"github.com/ctchen222/hotel-system/internal/response"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 )

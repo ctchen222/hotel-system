@@ -4,11 +4,11 @@ import (
 	"flag"
 	"net/http"
 
-	"github.com/ctchen1999/hotel-system/internal/api"
-	"github.com/ctchen1999/hotel-system/internal/api/middleware"
-	"github.com/ctchen1999/hotel-system/internal/db"
-	models "github.com/ctchen1999/hotel-system/internal/pg"
-	"github.com/ctchen1999/hotel-system/internal/response"
+	"github.com/ctchen222/hotel-system/internal/api"
+	"github.com/ctchen222/hotel-system/internal/api/middleware"
+	"github.com/ctchen222/hotel-system/internal/db"
+	models "github.com/ctchen222/hotel-system/internal/pg"
+	"github.com/ctchen222/hotel-system/internal/response"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -88,6 +88,7 @@ func main() {
 
 	// POSTGRES
 	api.Post("/pg/login", pgAuthHandler.HandleLogin)
+	api.Post("/pg/signup", pgUserHandler.HandleCreateUser)
 
 	adminPgApi.Get("/user", pgUserHandler.HandleGetUsers)
 	adminPgApi.Get("/user/:id", pgUserHandler.HandleGetUser)

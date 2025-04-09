@@ -3,9 +3,9 @@ package api
 import (
 	"fmt"
 
-	models "github.com/ctchen1999/hotel-system/internal/pg"
-	"github.com/ctchen1999/hotel-system/internal/pgtypes"
-	"github.com/ctchen1999/hotel-system/internal/response"
+	models "github.com/ctchen222/hotel-system/internal/pg"
+	"github.com/ctchen222/hotel-system/internal/pgtypes"
+	"github.com/ctchen222/hotel-system/internal/response"
 	"github.com/gofiber/fiber/v2"
 )
 
